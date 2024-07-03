@@ -23,10 +23,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Route files
-const bootcamp = require('./routes/bootcamp');
+const bootcamps = require('./routes/bootcamp');
+const courses = require('./routes/courses')
 
 // Mount routers
-app.use('/api/v1/bootcamps', bootcamp);
+app.use('/api/v1/bootcamps', bootcamps);
+app.use('/api/v1/courses', courses);
 app.use(errorHandler)
 
 

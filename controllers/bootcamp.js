@@ -1,5 +1,6 @@
 const ErrorResponse = require('../utils/errorResponse');
 const BootCamp = require('../models/Bootcamp');
+const Course = require('../models/Course');
 const asyncHandler = require('../middleware/async');
 const geocoder = require('../utils/geocoder')
 
@@ -9,7 +10,7 @@ exports.getBootCamps = asyncHandler(async (req, res) => {
     let query;
 
     // Copy req.query
-    const reqQuery = { ...req.query };
+    const reqQuery = {...req.query};
 
     // Fields to exclude
     const removeFields = ['select', 'sort', 'page', 'limit'];
@@ -117,10 +118,17 @@ exports.updateBootCamp = asyncHandler(async (req, res, next) => {
 // Delete bootcamp by ID
 exports.deleteBootCamp = asyncHandler(async (req, res, next) => {
     const bootcamp = await BootCamp.findById(req.params.id);
+
     if (!bootcamp) {
         return next(new ErrorResponse('Bootcamp not found', 404));
     }
+
+    // Delete related courses
+    await Course.deleteMany({bootcamp: req.params.id});
+
+    // Delete the bootcamp
     await bootcamp.deleteOne();
+
     res.status(200).json({
         success: true,
         data: {}
@@ -129,7 +137,7 @@ exports.deleteBootCamp = asyncHandler(async (req, res, next) => {
 
 // @desc Get Bootcamps Within A Radius
 exports.getBootCampsInRadius = asyncHandler(async (req, res, next) => {
-    const { zipcode, distance } = req.params;
+    const {zipcode, distance} = req.params;
 
     // Get latitude and longitude from geocoder
     const loc = await geocoder.geocode(zipcode);
